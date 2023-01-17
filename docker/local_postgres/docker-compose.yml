@@ -1,13 +1,13 @@
 version: '3.1'
 
 services:
-  db:
-    container_name: test_postgres
-    image: postgres:14.5
+  postgres_chart_service:
+    container_name: postgres_chart_service
+    image: postgres:14.6
     restart: always
     environment:
-      POSTGRES_DB: test_database
+      POSTGRES_DB: chart_service
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root1234
     ports:
-      - "5432:5432"
+      - "15432:5432"

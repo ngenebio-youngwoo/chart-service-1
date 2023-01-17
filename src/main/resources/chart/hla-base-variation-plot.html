@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8"/>
+    <title xml:lang="en-US">- no title specified</title>
+
+<!--    <script src="https://d3js.org/d3.v7.min.js"></script>-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        class GenoTypeDepth {
+            countA = 0.0
+            countT = 0.0
+            countG = 0.0
+            countC = 0.0
+            countDeletion = 0.0
+            major = 0.0
+            minor = 0.0
+            rest = 0.0
+
+            constructor(source) {
+                this.countA = source.CountA
+                this.countT = source.CountT
+                this.countG = source.CountG
+                this.countC = source.CountC
+                this.countDeletion = source.CountDeletion
+
+                const values = [this.countA, this.countT, this.countG, this.countC, this.countDeletion]
+                    .sort().reverse()
+                const sum = values.reduce((v1, v2) => v1 + v2, 0)
+
+                if (this.isHomo()) {
+                    this.major = (values[0] / sum) * 100.0
+                    this.minor = 0
+                    this.rest = ((values[1] + values[2] + values[3] + values[4]) / sum) * 100.0
+                } else { // is Hetero
+                    this.major = (values[0] / sum) * 100.0
+                    this.minor = (values[1] / sum) * 100.0
+                    this.rest = ((values[2] + values[3] + values[4]) / sum) * 100.0
+                }
+            }
+
+            /**
+             * @return {boolean}
+             */
+            isHomo() {
+                const values = [this.countA, this.countT, this.countG, this.countC, this.countDeletion]
+                return values.filter(value => value > 0).length === 1
+            }
+        }
+
+        let margin = { top: 50, right: 50, bottom: 50, left: 50 }
+        let width = 1000 - margin.left - margin.right
+        let height = 600 - margin.top - margin.bottom
+        const TOP_POSITION_COLOR = '#2942ff'
+        const BOTTOM_POSITION_COLOR = '#f21149'
+        const REST_POSITION_COLOR = '#009434'
+        const MASKING_POSITION_COLOR = '#b2b2b2'
+        const BALANCE_GUARANTEE_SECTION_COLOR = '#fff8eb'
+
+        async function drawChart() {
+            const svg = initD3()
+
+            const baseVariationPlotData = await loadData()
+
+            initXAxis(svg, baseVariationPlotData);
+            initYAxis(svg);
+            drawBalanceGuaranteeSection(svg)
+            drawHalfLine(svg)
+            drawPlotCircle(svg, baseVariationPlotData)
+            // drawMaskingPlotCircle(svg, baseVariationPlotData)
+
+            // generateChartPngImage(onGeneratedChartImage)
+        }
+
+        function generateChartSvgImageBase64() {
+            const svg = document.querySelector('#d3_aria_line_chart > svg')
+            const value = new XMLSerializer().serializeToString(svg)
+            return 'data:image/svg+xml;base64,' + window.btoa(value)
+        }
+
+        function generateChartPngImage(callback) {
+            const base64 = generateChartSvgImageBase64()
+
+            let canvas = document.createElement('canvas')
+            let context = canvas.getContext('2d')
+            canvas.width = width
+            canvas.height = height
+
+            let image = new Image()
+            image.onload = () => {
+                context.clearRect(0, 0, width, height)
+
+                context.beginPath()
+                context.rect(0, 0, width, height)
+                context.stroke()
+
+                context.drawImage(image, 0, 0, width, height)
+
+                let pngData = canvas.toDataURL('image/png')
+                callback(pngData)
+            }
+            image.src = base64
+        }
+
+        function generateChartPngImageProcess() {
+            return new Promise((resolve, reject) => {
+                const base64 = generateChartSvgImageBase64()
+
+                let canvas = document.createElement('canvas')
+                let context = canvas.getContext('2d')
+                canvas.width = width
+                canvas.height = height
+
+                let image = new Image()
+                image.onload = () => {
+                    context.clearRect(0, 0, width, height)
+
+                    context.beginPath()
+                    context.rect(0, 0, width, height)
+                    context.stroke()
+
+                    context.drawImage(image, 0, 0, width, height)
+
+                    let pngData = canvas.toDataURL('image/png')
+                    resolve(pngData)
+                }
+                image.onerror = reject
+                image.src = base64
+            })
+        }
+
+        function onGeneratedChartImage(pngData) {
+            console.log(pngData)
+        }
+
+        function initD3() {
+            return d3.select('#d3_aria_line_chart')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+        }
+
+        async function loadData() {
+            const response = await fetch('http://localhost:3000/hla/baseVariationPlotData.json', {
+                method: 'GET'
+            })
+            return response.json()
+        }
+
+        function initXAxis(svg, baseVariationPlotData) {
+            const genoTypeDepthValues = Object.values(baseVariationPlotData.genotypeDepth)
+
+            const x = d3.scaleLinear()
+                .domain([0, genoTypeDepthValues.length])
+                .range([0, width])
+
+            svg.append('g')
+                .attr('transform', `translate(0,  ${height})`)
+                .call(d3.axisBottom(x).ticks(5).tickSizeOuter(0))
+        }
+
+        function initYAxis(svg) {
+            const y = d3.scaleLinear()
+                .domain([0, 102])
+                .range([height, 0])
+
+            svg.append('g')
+                .attr('transform', `translate(0, -10)`)
+                .call(d3.axisLeft(y).ticks(5).tickSizeOuter(0))
+        }
+
+        function drawPlotCircle(svg, baseVariationPlotData) {
+            const targetMaskList  = baseVariationPlotData.targetMaskList
+
+            const genoTypeDepthValues = Object.values(baseVariationPlotData.genotypeDepth)
+            genoTypeDepthValues.forEach((item, index) => {
+                const genoTypeDepth = new GenoTypeDepth(item)
+                if (genoTypeDepth.isHomo()) {
+                    drawMajorCircle(svg, index, genoTypeDepth.major, targetMaskList)
+                } else { // is Hetero
+                    drawMajorCircle(svg, index, genoTypeDepth.major, targetMaskList)
+                    drawMinorCircle(svg, index, genoTypeDepth.minor, targetMaskList)
+                    drawRestCircle(svg, index, genoTypeDepth.rest)
+                }
+            })
+        }
+
+        function drawBalanceGuaranteeSection(svg) {
+            svg.append('rect')
+                .attr('x', 2)
+                .attr('y', height - (height * 0.8))
+                .attr('width', width)
+                .attr('height', height * 0.6)
+                .style('fill', BALANCE_GUARANTEE_SECTION_COLOR)
+        }
+
+        function drawMaskingPlotCircle(svg, baseVariationPlotData) {
+            const targetMaskList  = baseVariationPlotData.targetMaskList
+
+            const genoTypeDepthValues = Object.values(baseVariationPlotData.genotypeDepth)
+            genoTypeDepthValues.forEach((item, index) => {
+                const genoTypeDepth = new GenoTypeDepth(item)
+
+                if (isMaskingRegion(index, targetMaskList))
+                    return
+
+                drawCircleValue(svg, index, genoTypeDepth.major, MASKING_POSITION_COLOR, MASKING_POSITION_COLOR)
+                if (!genoTypeDepth.isHomo()) { // is Hetero
+                    drawCircleValue(svg, index, genoTypeDepth.major, MASKING_POSITION_COLOR, MASKING_POSITION_COLOR)
+                }
+            })
+        }
+
+        function drawMajorCircle(svg, genoTypePosition, majorValue, targetMaskList) {
+            let majorColor
+            if (isMaskingRegion(genoTypePosition, targetMaskList)) {
+                majorColor = MASKING_POSITION_COLOR
+            } else {
+                majorColor = majorValue >= 50 ? TOP_POSITION_COLOR : BOTTOM_POSITION_COLOR
+            }
+            drawCircleValue(svg, genoTypePosition, majorValue, majorColor, majorColor)
+        }
+
+        function drawMinorCircle(svg, genoTypePosition, minorValue, targetMaskList) {
+            let minorColor
+            if (isMaskingRegion(genoTypePosition, targetMaskList)) {
+                minorColor = MASKING_POSITION_COLOR
+            } else {
+                minorColor = minorValue >= 50 ? TOP_POSITION_COLOR : BOTTOM_POSITION_COLOR
+            }
+            drawCircleValue(svg, genoTypePosition, minorValue, minorColor, minorColor)
+        }
+
+        function drawRestCircle(svg, genoTypePosition, restValue) {
+            restValue = restValue === 0 ? 10 : restValue
+            svg.append("circle")
+                .style("fill", '#FFFFFF')
+                .style("stroke", REST_POSITION_COLOR)
+                .style("stroke-width", 1)
+                .attr("r", 2)
+                .attr("cx", genoTypePosition)
+                .attr("cy", height - restValue)
+        }
+
+        function drawCircleValue(svg, xValue, percentage, fillColor, strokeColor) {
+            let value = height * (percentage / 100.0)
+            value = value === 0 ? 10 : value
+            svg.append("circle")
+                .style("fill", fillColor)
+                .style("stroke", strokeColor)
+                .attr("r", 2)
+                .attr("cx", xValue)
+                .attr("cy", height - value)
+        }
+
+        function drawHalfLine(svg) {
+            svg.append("line")
+                .style("stroke", '#f21149')
+                .style('stroke-dasharray', '0 2 0')
+                .attr("x1", 0)
+                .attr("y1", height * 0.5)
+                .attr("x2", width)
+                .attr("y2", height * 0.5)
+        }
+
+        function isMaskingRegion(genoTypePosition, targetMaskList) {
+            for (let i = 0; i < targetMaskList.length; i++) {
+                const item = targetMaskList[i];
+                if (genoTypePosition >= item.StartPosition && genoTypePosition <= item.EndPosition) {
+                    return true
+                }
+            }
+            return false
+        }
+    </script>
+
+    <style>
+        #d3_aria_line_chart > svg {
+            border: 1px solid gray;
+        }
+    </style>
+</head>
+<body onload="drawChart()">
+    <div id="d3_aria_line_chart"></div>
+</body>
+</html>

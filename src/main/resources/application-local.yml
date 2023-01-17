@@ -26,7 +26,7 @@ spring:
                 dialect: org.hibernate.dialect.PostgreSQLDialect
         database: postgresql
     flyway:
-        url: jdbc:postgresql://localhost:5432/test_database
+        url: jdbc:postgresql://localhost:5432/chart_service
         user: root
         password: root1234
         baseline-version: 0

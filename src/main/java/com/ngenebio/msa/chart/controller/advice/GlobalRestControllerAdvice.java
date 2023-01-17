@@ -1,0 +1,34 @@
+package com.ngenebio.msa.chart.controller.advice;
+
+import com.ngenebio.msa.chart.exception.ApplicationException;
+import com.ngenebio.msa.chart.model.ResponseDto;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice(basePackages = { "com.dptablo.template.springboot" })
+@Slf4j
+public class GlobalRestControllerAdvice {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> exceptionHandler(Exception e) {
+        log.error(e.getMessage());
+        log.error(ExceptionUtils.getStackTrace(e));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @ExceptionHandler(ApplicationException.class)
+    public ResponseEntity<ResponseDto> applicationExceptionHandler(ApplicationException e) {
+        log.error(e.getMessage());
+        log.error(ExceptionUtils.getStackTrace(e));
+        var responseDto = ResponseDto.builder()
+                .code(e.getErrorCode().getErrorCode())
+                .message(e.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(responseDto);
+    }
+}

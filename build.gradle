@@ -48,6 +48,9 @@ dependencies {
 
     implementation 'org.springframework.kafka:spring-kafka'
 
+    /* selenium */
+    implementation 'org.seleniumhq.selenium:selenium-chrome-driver:4.7.2'
+
     /* database */
     implementation 'org.flywaydb:flyway-core:9.8.2'
     implementation "org.mariadb.jdbc:mariadb-java-client:3.1.0"
