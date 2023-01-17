@@ -56,6 +56,8 @@
         const REST_POSITION_COLOR = '#009434'
         const MASKING_POSITION_COLOR = '#b2b2b2'
         const BALANCE_GUARANTEE_SECTION_COLOR = '#fff8eb'
+        const CORE_EXON_SECTION_COLOR = '#e9d2f4'
+        const INTRON_SECTION_COLOR = '#e1e3ff'
 
         async function drawChart() {
             const svg = initD3()
@@ -65,9 +67,12 @@
             initXAxis(svg, baseVariationPlotData);
             initYAxis(svg);
             drawBalanceGuaranteeSection(svg)
+            drawSections(svg, baseVariationPlotData)
+            drawAxisGuideLine(svg)
             drawHalfLine(svg)
             drawPlotCircle(svg, baseVariationPlotData)
             // drawMaskingPlotCircle(svg, baseVariationPlotData)
+
 
             // generateChartPngImage(onGeneratedChartImage)
         }
@@ -175,14 +180,17 @@
             const targetMaskList  = baseVariationPlotData.targetMaskList
 
             const genoTypeDepthValues = Object.values(baseVariationPlotData.genotypeDepth)
+            const genoTypeDepthValuesLength = genoTypeDepthValues.length.toFixed(2)
             genoTypeDepthValues.forEach((item, index) => {
                 const genoTypeDepth = new GenoTypeDepth(item)
+                const xPercentage = index / genoTypeDepthValuesLength
+
                 if (genoTypeDepth.isHomo()) {
-                    drawMajorCircle(svg, index, genoTypeDepth.major, targetMaskList)
+                    drawMajorCircle(svg, index, xPercentage, genoTypeDepth.major, targetMaskList)
                 } else { // is Hetero
-                    drawMajorCircle(svg, index, genoTypeDepth.major, targetMaskList)
-                    drawMinorCircle(svg, index, genoTypeDepth.minor, targetMaskList)
-                    drawRestCircle(svg, index, genoTypeDepth.rest)
+                    drawMajorCircle(svg, index, xPercentage, genoTypeDepth.major, targetMaskList)
+                    drawMinorCircle(svg, index, xPercentage, genoTypeDepth.minor, targetMaskList)
+                    drawRestCircle(svg, xPercentage, genoTypeDepth.rest)
                 }
             })
         }
@@ -194,6 +202,67 @@
                 .attr('width', width)
                 .attr('height', height * 0.6)
                 .style('fill', BALANCE_GUARANTEE_SECTION_COLOR)
+        }
+
+        function drawSections(svg, baseVariationPlotData) {
+            const targetRegionList = baseVariationPlotData.targetRegionList
+
+            const genoTypeDepthValues = Object.values(baseVariationPlotData.genotypeDepth)
+            const genoTypeDepthValuesLength = genoTypeDepthValues.length.toFixed(2)
+
+            // core exon
+            targetRegionList
+                .filter(item => item.Region === 'exon2' || item.Region === 'exon3')
+                .forEach(item => {
+                    const startXPercentage = item.StartPosition / genoTypeDepthValuesLength
+                    const endXPercentage = item.EndPosition / genoTypeDepthValuesLength
+                    const x1 = width * startXPercentage
+                    const x2 = (width * endXPercentage) - x1
+                    svg.append('rect')
+                        .attr('x', x1)
+                        .attr('y', 0)
+                        .attr('width', x2)
+                        .attr('height', height)
+                        .style('fill', CORE_EXON_SECTION_COLOR)
+                })
+
+            // intron
+            targetRegionList
+                .filter(item => item.Region.includes('intron'))
+                .forEach(item => {
+                    const startXPercentage = item.StartPosition / genoTypeDepthValuesLength
+                    const endXPercentage = item.EndPosition / genoTypeDepthValuesLength
+                    const x1 = width * startXPercentage
+                    const x2 = (width * endXPercentage) - x1
+                    svg.append('rect')
+                        .attr('x', x1)
+                        .attr('y', 0)
+                        .attr('width', x2)
+                        .attr('height', height)
+                        .style('fill', INTRON_SECTION_COLOR)
+                })
+        }
+
+        function drawAxisGuideLine(svg) {
+            // 20
+            const y_20 = height - (height * 0.20)
+            svg.append("line")
+                .attr('transform', `translate(0, -10)`)
+                .style("stroke", '#b4b4b4')
+                .attr("x1", 0)
+                .attr("y1", y_20)
+                .attr("x2", width)
+                .attr("y2", y_20)
+
+            // 40
+            const y_40 = height - (height * 0.40)
+            svg.append("line")
+                .attr('transform', `translate(0, -10)`)
+                .style("stroke", '#b4b4b4')
+                .attr("x1", 0)
+                .attr("y1", y_40)
+                .attr("x2", width)
+                .attr("y2", y_40)
         }
 
         function drawMaskingPlotCircle(svg, baseVariationPlotData) {
@@ -213,45 +282,45 @@
             })
         }
 
-        function drawMajorCircle(svg, genoTypePosition, majorValue, targetMaskList) {
+        function drawMajorCircle(svg, genoTypePosition, xPercentage, majorValue, targetMaskList) {
             let majorColor
             if (isMaskingRegion(genoTypePosition, targetMaskList)) {
                 majorColor = MASKING_POSITION_COLOR
             } else {
                 majorColor = majorValue >= 50 ? TOP_POSITION_COLOR : BOTTOM_POSITION_COLOR
             }
-            drawCircleValue(svg, genoTypePosition, majorValue, majorColor, majorColor)
+            drawCircleValue(svg, xPercentage, majorValue, majorColor, majorColor)
         }
 
-        function drawMinorCircle(svg, genoTypePosition, minorValue, targetMaskList) {
+        function drawMinorCircle(svg, genoTypePosition, xPercentage, minorValue, targetMaskList) {
             let minorColor
             if (isMaskingRegion(genoTypePosition, targetMaskList)) {
                 minorColor = MASKING_POSITION_COLOR
             } else {
                 minorColor = minorValue >= 50 ? TOP_POSITION_COLOR : BOTTOM_POSITION_COLOR
             }
-            drawCircleValue(svg, genoTypePosition, minorValue, minorColor, minorColor)
+            drawCircleValue(svg, xPercentage, minorValue, minorColor, minorColor)
         }
 
-        function drawRestCircle(svg, genoTypePosition, restValue) {
+        function drawRestCircle(svg, xPercentage, restValue) {
             restValue = restValue === 0 ? 10 : restValue
             svg.append("circle")
                 .style("fill", '#FFFFFF')
                 .style("stroke", REST_POSITION_COLOR)
                 .style("stroke-width", 1)
                 .attr("r", 2)
-                .attr("cx", genoTypePosition)
+                .attr("cx", width * xPercentage)
                 .attr("cy", height - restValue)
         }
 
-        function drawCircleValue(svg, xValue, percentage, fillColor, strokeColor) {
-            let value = height * (percentage / 100.0)
+        function drawCircleValue(svg, xPercentage, yPercentage, fillColor, strokeColor) {
+            let value = height * (yPercentage / 100.0)
             value = value === 0 ? 10 : value
             svg.append("circle")
                 .style("fill", fillColor)
                 .style("stroke", strokeColor)
                 .attr("r", 2)
-                .attr("cx", xValue)
+                .attr("cx", width * xPercentage)
                 .attr("cy", height - value)
         }
 
