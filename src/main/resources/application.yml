@@ -1,0 +1,38 @@
+spring:
+    config:
+        activate:
+            on-profile: prod
+    jackson:
+        default-property-inclusion: non_null
+    thymeleaf:
+        prefix: classpath:templates/
+        suffix: .html
+        cache: false
+        enabled: true
+    flyway:
+        enable: true
+        locations: classpath:db/migration,classpath:db/migration/postgresql
+        baseline-on-migrate: true
+        baseline-version: 0
+        validate-on-migrate: true
+        sql-migration-suffixes: ddl
+server:
+    servlet:
+        context-path: /
+        session:
+            timeout: 600s
+    tomcat:
+        uri-encoding: UTF-8
+        threads:
+            min-spare: 20
+            max: 200
+springdoc:
+    default-produces-media-type: application/json;charset=UTF-8
+    default-consumes-media-type: application/json;charset=UTF-8
+    packages-to-scan: com.dptablo.template.springboot
+    cache:
+        disabled: true
+    api-docs:
+        path: /api/v3/docs
+    swagger-ui:
+        path: /api/v3/swagger-ui.html
