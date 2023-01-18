@@ -57,8 +57,9 @@
         const REST_POSITION_COLOR = '#009434'
         const MASKING_POSITION_COLOR = '#b2b2b2'
         const BALANCE_GUARANTEE_SECTION_COLOR = '#fff8eb'
-        const CORE_EXON_SECTION_COLOR = '#e9d2f4'
-        const INTRON_SECTION_COLOR = '#e1e3ff'
+        const BALANCE_GUARANTEE_SECTION_COLOR_OPACITY = 0.8
+        const CORE_EXON_SECTION_COLOR = '#eddefe'
+        const INTRON_SECTION_COLOR = '#d2e9ff'
 
         async function drawChart() {
             const svg = initD3()
@@ -148,10 +149,15 @@
         }
 
         async function loadData() {
-            const response = await fetch('http://localhost:3000/hla/baseVariationPlotData.json', {
-                method: 'GET'
-            })
-            return response.json()
+            // mustache 로 데이터를 삽입하는 코드
+            const data = `{{&jsonData}}`
+            return JSON.parse(data)
+
+            // 로컬 서버를 이용한 데이터 로드 코드
+            // const response = await fetch('http://localhost:3000/hla/baseVariationPlotData.json', {
+            //     method: 'GET'
+            // })
+            // return response.json()
         }
 
         function initXAxis(svg, baseVariationPlotData) {
@@ -190,7 +196,7 @@
                 } else { // is Hetero
                     drawMajorCircle(svg, index, xPercentage, genoTypeDepth.major, targetMaskList)
                     drawMinorCircle(svg, index, xPercentage, genoTypeDepth.minor, targetMaskList)
-                    drawRestCircle(svg, xPercentage, genoTypeDepth.rest)
+                    drawRestCircle(svg, index, xPercentage, genoTypeDepth.rest, targetMaskList)
                 }
             })
         }
@@ -226,6 +232,7 @@
                         .attr('width', x2)
                         .attr('height', height)
                         .style('fill', CORE_EXON_SECTION_COLOR)
+                        .style('opacity', 0.8)
                 })
 
             // intron
@@ -242,6 +249,7 @@
                         .attr('width', x2)
                         .attr('height', height)
                         .style('fill', INTRON_SECTION_COLOR)
+                        .style('opacity', 0.8)
                 })
         }
 
@@ -288,9 +296,9 @@
         function drawMajorCircle(svg, genoTypePosition, xPercentage, majorValue, targetMaskList) {
             let majorColor
             if (isMaskingRegion(genoTypePosition, targetMaskList)) {
-                majorColor = MASKING_POSITION_COLOR
-            } else {
                 majorColor = majorValue >= 50 ? TOP_POSITION_COLOR : BOTTOM_POSITION_COLOR
+            } else {
+                majorColor = MASKING_POSITION_COLOR
             }
             drawCircleValue(svg, xPercentage, majorValue, majorColor, majorColor)
         }
@@ -298,27 +306,29 @@
         function drawMinorCircle(svg, genoTypePosition, xPercentage, minorValue, targetMaskList) {
             let minorColor
             if (isMaskingRegion(genoTypePosition, targetMaskList)) {
-                minorColor = MASKING_POSITION_COLOR
-            } else {
                 minorColor = minorValue >= 50 ? TOP_POSITION_COLOR : BOTTOM_POSITION_COLOR
+            } else {
+                minorColor = MASKING_POSITION_COLOR
             }
             drawCircleValue(svg, xPercentage, minorValue, minorColor, minorColor)
         }
 
-        function drawRestCircle(svg, xPercentage, restValue) {
-            restValue = restValue === 0 ? 10 : restValue
-            svg.append("circle")
-                .style("fill", '#FFFFFF')
-                .style("stroke", REST_POSITION_COLOR)
-                .style("stroke-width", 1)
-                .attr("r", 2)
-                .attr("cx", width * xPercentage)
-                .attr("cy", height - restValue)
+        function drawRestCircle(svg, genoTypePosition, xPercentage, restValue, targetMaskList) {
+            let restStrokeColor
+            let restFillColor
+            if (isMaskingRegion(genoTypePosition, targetMaskList)) {
+                restFillColor = REST_POSITION_COLOR
+                restStrokeColor = '#ffffff'
+            } else {
+                restFillColor = MASKING_POSITION_COLOR
+                restStrokeColor = MASKING_POSITION_COLOR
+            }
+            drawCircleValue(svg, xPercentage, restValue, restStrokeColor, restFillColor)
         }
 
         function drawCircleValue(svg, xPercentage, yPercentage, fillColor, strokeColor) {
             let value = height * (yPercentage / 100.0)
-            value = value === 0 ? 10 : value
+            value = value <= 10 ? 10 : value
             svg.append("circle")
                 .style("fill", fillColor)
                 .style("stroke", strokeColor)

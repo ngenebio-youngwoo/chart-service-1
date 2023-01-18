@@ -2,6 +2,7 @@ package com.ngenebio.msa.chart.service.defaults;
 
 import com.ngenebio.msa.chart.model.ChartResult;
 import com.ngenebio.msa.chart.model.enumtype.ChartType;
+import com.ngenebio.msa.chart.mustache.MustacheChartHtmlGenerator;
 import com.ngenebio.msa.chart.selenium.ChartJavaScriptExecutorUtils;
 import com.ngenebio.msa.chart.service.HlaChartService;
 import lombok.RequiredArgsConstructor;
@@ -14,23 +15,34 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DefaultHlaChartService implements HlaChartService {
-    private ChartJavaScriptExecutorUtils chartJavaScriptExecutorUtils = new ChartJavaScriptExecutorUtils();
+    private final ChartJavaScriptExecutorUtils chartJavaScriptExecutorUtils = new ChartJavaScriptExecutorUtils();
+    private final MustacheChartHtmlGenerator mustacheChartHtmlGenerator = new MustacheChartHtmlGenerator();
 
     @Override
     public ChartResult generateBaseVariationPlot(String json, List<ChartType> chartTypes) throws IOException {
+        Path tempDirectoryPath = null;
         WebDriver chromeDriver = null;
         try {
+            var renderedChartHtmlFileName = UUID.randomUUID().toString();
+
+            tempDirectoryPath = createTempDirectory(renderedChartHtmlFileName);
+
+            var chartHtmlFileResourcePath = "chart/hla-base-variation-plot.html";
+            Path chartHtmlFilePath = generateRenderedChartHtmlFile(tempDirectoryPath, chartHtmlFileResourcePath, json);
+
             chromeDriver = createChromeDriver();
             var javaScriptExecutor = (JavascriptExecutor) chromeDriver;
-
-            var htmlFile = new ClassPathResource("chart/hla-base-variation-plot.html", this.getClass().getClassLoader());
-            chromeDriver.get("file://" + htmlFile.getFile().getAbsolutePath());
+            chromeDriver.get("file://" + chartHtmlFilePath.toFile().getAbsolutePath());
 
             var result = new ChartResult();
             for (var chartType : chartTypes) {
@@ -47,7 +59,34 @@ public class DefaultHlaChartService implements HlaChartService {
             if (chromeDriver != null) {
                 chromeDriver.close();
             }
+
+            // TODO: 테스트를 위해 임시 비활성화
+//            if (tempDirectoryPath != null)
+//                FileUtils.deleteDirectory(tempDirectoryPath.toFile());
         }
+    }
+
+    private static Path createTempDirectory(String chartFileName) throws IOException {
+        var tempDirectoryPath = Paths.get(System.getProperty("java.io.tmpdir"),
+                "ngenebio_chart_temp", chartFileName);
+        if (!Files.exists(tempDirectoryPath))
+            Files.createDirectories(tempDirectoryPath);
+
+        return tempDirectoryPath;
+    }
+
+    private Path generateRenderedChartHtmlFile(
+            Path tempDirectoryPath,
+            String htmlFileResourcePath,
+            String json
+    ) throws IOException {
+        var chartHtmlFile = new ClassPathResource(htmlFileResourcePath, this.getClass().getClassLoader());
+        var chartHtmlString = new String(Files.readAllBytes(chartHtmlFile.getFile().toPath()));
+        var renderedChartHtmlString = mustacheChartHtmlGenerator.execute(chartHtmlString, json);
+
+        return Files.write(
+                Paths.get(tempDirectoryPath.toFile().getAbsolutePath(), UUID.randomUUID().toString() + ".html"),
+                renderedChartHtmlString.getBytes());
     }
 
     private WebDriver createChromeDriver() {
