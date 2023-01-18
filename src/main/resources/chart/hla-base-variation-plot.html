@@ -51,6 +51,7 @@
         let margin = { top: 50, right: 50, bottom: 50, left: 50 }
         let width = 1000 - margin.left - margin.right
         let height = 600 - margin.top - margin.bottom
+        const Y_AXIS_UP_POSITION = 10
         const TOP_POSITION_COLOR = '#2942ff'
         const BOTTOM_POSITION_COLOR = '#f21149'
         const REST_POSITION_COLOR = '#009434'
@@ -71,9 +72,8 @@
             drawAxisGuideLine(svg)
             drawHalfLine(svg)
             drawPlotCircle(svg, baseVariationPlotData)
-            // drawMaskingPlotCircle(svg, baseVariationPlotData)
 
-
+            // 차트 png 생성 콜백함수 바인딩 코드
             // generateChartPngImage(onGeneratedChartImage)
         }
 
@@ -172,7 +172,7 @@
                 .range([height, 0])
 
             svg.append('g')
-                .attr('transform', `translate(0, -10)`)
+                .attr('transform', `translate(0, -${Y_AXIS_UP_POSITION})`)
                 .call(d3.axisLeft(y).ticks(5).tickSizeOuter(0))
         }
 
@@ -198,9 +198,11 @@
         function drawBalanceGuaranteeSection(svg) {
             svg.append('rect')
                 .attr('x', 2)
-                .attr('y', height - (height * 0.8))
+                .attr('y', height - (height * 0.8) - 2)
+                // .attr('y', 0)
                 .attr('width', width)
-                .attr('height', height * 0.6)
+                .attr('height', height * 0.6 - 4)
+                // .attr('height', 100)
                 .style('fill', BALANCE_GUARANTEE_SECTION_COLOR)
         }
 
@@ -244,42 +246,43 @@
         }
 
         function drawAxisGuideLine(svg) {
+            const GUIDELINE_COLOR = '#c7c7c7'
+
             // 20
-            const y_20 = height - (height * 0.20)
+            const y_20 = height - (height * 0.20) - Y_AXIS_UP_POSITION + 2
             svg.append("line")
-                .attr('transform', `translate(0, -10)`)
-                .style("stroke", '#b4b4b4')
+                .style("stroke", GUIDELINE_COLOR)
                 .attr("x1", 0)
                 .attr("y1", y_20)
                 .attr("x2", width)
                 .attr("y2", y_20)
 
             // 40
-            const y_40 = height - (height * 0.40)
+            const y_40 = height - (height * 0.40) - Y_AXIS_UP_POSITION + 4
             svg.append("line")
-                .attr('transform', `translate(0, -10)`)
-                .style("stroke", '#b4b4b4')
+                .style("stroke", GUIDELINE_COLOR)
                 .attr("x1", 0)
                 .attr("y1", y_40)
                 .attr("x2", width)
                 .attr("y2", y_40)
-        }
 
-        function drawMaskingPlotCircle(svg, baseVariationPlotData) {
-            const targetMaskList  = baseVariationPlotData.targetMaskList
+            // 60
+            const y_60 = height - (height * 0.60) - Y_AXIS_UP_POSITION + 6
+            svg.append("line")
+                .style("stroke", GUIDELINE_COLOR)
+                .attr("x1", 0)
+                .attr("y1", y_60)
+                .attr("x2", width)
+                .attr("y2", y_60)
 
-            const genoTypeDepthValues = Object.values(baseVariationPlotData.genotypeDepth)
-            genoTypeDepthValues.forEach((item, index) => {
-                const genoTypeDepth = new GenoTypeDepth(item)
-
-                if (isMaskingRegion(index, targetMaskList))
-                    return
-
-                drawCircleValue(svg, index, genoTypeDepth.major, MASKING_POSITION_COLOR, MASKING_POSITION_COLOR)
-                if (!genoTypeDepth.isHomo()) { // is Hetero
-                    drawCircleValue(svg, index, genoTypeDepth.major, MASKING_POSITION_COLOR, MASKING_POSITION_COLOR)
-                }
-            })
+            // 80
+            const y_80 = height - (height * 0.8) - Y_AXIS_UP_POSITION + 8
+            svg.append("line")
+                .style("stroke", GUIDELINE_COLOR)
+                .attr("x1", 0)
+                .attr("y1", y_80)
+                .attr("x2", width)
+                .attr("y2", y_80)
         }
 
         function drawMajorCircle(svg, genoTypePosition, xPercentage, majorValue, targetMaskList) {
