@@ -29,6 +29,8 @@
         let width = 1000 - margin.left - margin.right
         let height = 600 - margin.top - margin.bottom
         const Y_AXIS_UP_POSITION = 10
+        const CORE_EXON_SECTION_COLOR = '#eddefe'
+        const INTRON_SECTION_COLOR = '#d2e9ff'
 
         async function drawChart() {
             const svg = initD3()
@@ -42,7 +44,10 @@
             })
 
             initXAxis(svg, coveragePlotData);
-            initYAxis(svg, genoTypeDepthList);
+            const maxYValue = initYAxis(svg, genoTypeDepthList);
+            drawCoverageBar(svg, genoTypeDepthList, maxYValue)
+            drawSections(svg, coveragePlotData)
+            drawHalfLine(svg)
 
             // 차트 png 생성 콜백함수 바인딩 코드
             // generateChartPngImage(onGeneratedChartImage)
@@ -82,15 +87,91 @@
         }
 
         function initYAxis(svg, genoTypeDepthList) {
-            // TODO: genoTypeDepthList 의 countSum 최대값으로 y축 max 설정
+            const maxValue = genoTypeDepthList
+                .map(item => item.countSum)
+                .reduce((a,b) => a > b ? a : b)
 
             const y = d3.scaleLinear()
-                .domain([0, 102])
+                .domain([0, maxValue])
                 .range([height, 0])
 
             svg.append('g')
-                .attr('transform', `translate(0, -${Y_AXIS_UP_POSITION})`)
-                .call(d3.axisLeft(y).ticks(5).tickSizeOuter(0))
+                // .attr('transform', `translate(0, -${Y_AXIS_UP_POSITION})`)
+                .call(d3.axisLeft(y).ticks(10).tickSizeOuter(0))
+
+            return maxValue
+        }
+
+        function drawSections(svg, coveragePlotData) {
+            const targetRegionList = coveragePlotData.targetRegionList
+
+            const genoTypeDepthValues = Object.values(coveragePlotData.genotypeDepth)
+            const genoTypeDepthValuesLength = genoTypeDepthValues.length.toFixed(2)
+
+            // core exon
+            targetRegionList
+                .filter(item => item.Region === 'exon2' || item.Region === 'exon3')
+                .forEach(item => {
+                    const startXPercentage = item.StartPosition / genoTypeDepthValuesLength
+                    const endXPercentage = item.EndPosition / genoTypeDepthValuesLength
+                    const x1 = width * startXPercentage
+                    const x2 = (width * endXPercentage) - x1
+                    svg.append('rect')
+                        .attr('x', x1)
+                        .attr('y', 0)
+                        .attr('width', x2)
+                        .attr('height', height)
+                        .style('fill', CORE_EXON_SECTION_COLOR)
+                        .style('opacity', 0.45)
+                })
+
+            // intron
+            targetRegionList
+                .filter(item => item.Region.includes('intron'))
+                .forEach(item => {
+                    const startXPercentage = item.StartPosition / genoTypeDepthValuesLength
+                    const endXPercentage = item.EndPosition / genoTypeDepthValuesLength
+                    const x1 = width * startXPercentage
+                    const x2 = (width * endXPercentage) - x1
+                    svg.append('rect')
+                        .attr('x', x1)
+                        .attr('y', 0)
+                        .attr('width', x2)
+                        .attr('height', height)
+                        .style('fill', INTRON_SECTION_COLOR)
+                        .style('opacity', 0.45)
+                })
+        }
+
+        function drawHalfLine(svg) {
+            svg.append("line")
+                .style("stroke", '#f21149')
+                .style('stroke-dasharray', '0 2 0')
+                .attr("x1", 0)
+                .attr("y1", height * 0.5)
+                .attr("x2", width)
+                .attr("y2", height * 0.5)
+        }
+
+        function drawCoverageBar(svg, genoTypeDepthList, maxYValue) {
+            const genoTypeDepthListLength = genoTypeDepthList.length
+            genoTypeDepthList.forEach((item, index) => {
+                const xPercentage = index / (genoTypeDepthListLength * 1.0)
+                const yPercentage = item.countSum / (maxYValue * 1.0);
+
+                let xValue = width * xPercentage
+
+                let yValue = height * yPercentage
+                yValue = yValue > Y_AXIS_UP_POSITION ? yValue : Y_AXIS_UP_POSITION
+
+                svg.append('rect')
+                    .attr('x', xValue + 1)
+                    .attr('y', height - yValue - 1)
+                    .attr('width', 1)
+                    .attr('height', yValue)
+                    .style('fill', '#4ad5f7')
+                    // .style('opacity', 0.5)
+            })
         }
     </script>
 </head>
