@@ -9,13 +9,6 @@ spring:
         suffix: .html
         cache: false
         enabled: true
-    flyway:
-        enable: true
-        locations: classpath:db/migration,classpath:db/migration/postgresql
-        baseline-on-migrate: true
-        baseline-version: 0
-        validate-on-migrate: true
-        sql-migration-suffixes: ddl
 server:
     servlet:
         context-path: /
@@ -29,7 +22,6 @@ server:
 springdoc:
     default-produces-media-type: application/json;charset=UTF-8
     default-consumes-media-type: application/json;charset=UTF-8
-    packages-to-scan: com.dptablo.template.springboot
     cache:
         disabled: true
     api-docs:

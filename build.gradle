@@ -47,36 +47,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-undertow'
     implementation 'org.springframework.boot:spring-boot-starter-mustache'
 
-    implementation 'org.springframework.kafka:spring-kafka'
-
     /* selenium */
     implementation 'org.seleniumhq.selenium:selenium-chrome-driver:4.7.2'
-
-    /* database */
-    implementation 'org.flywaydb:flyway-core:9.8.2'
-    implementation "org.mariadb.jdbc:mariadb-java-client:3.1.0"
-    implementation "org.postgresql:postgresql:42.5.1"
-
-    /* data - jpa */
-    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
-
-    /* data - queryDSL */
-    implementation "com.querydsl:querydsl-jpa:$queryDslVersion:jakarta"
-    implementation "com.querydsl:querydsl-apt:$queryDslVersion:jakarta"
-    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
-    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-
-    /* data - mongodb reactive */
-    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
-
-    /* data - r2dbc */
-    implementation "org.springframework.data:spring-data-r2dbc"
-    implementation 'io.r2dbc:r2dbc-pool:1.0.0.RELEASE'
-    implementation 'org.postgresql:r2dbc-postgresql:1.0.0.RELEASE'
-
-    /* jwt */
-    implementation 'com.auth0:java-jwt:4.2.1'
 
     /* utils */
     implementation 'org.apache.commons:commons-lang3'
@@ -103,20 +75,9 @@ dependencies {
 
     testImplementation "org.testcontainers:junit-jupiter:$testcontainersVersion"
 
-    /* testing - database */
-    testImplementation "com.h2database:h2:2.1.214"
-    testImplementation "org.testcontainers:testcontainers:$testcontainersVersion"
-    testImplementation "org.testcontainers:postgresql:$testcontainersVersion"
-    testImplementation "org.testcontainers:mongodb:$testcontainersVersion"
-    testImplementation "org.testcontainers:r2dbc:$testcontainersVersion"
-
     /* testing - mocking api server */
     testImplementation "com.squareup.okhttp3:okhttp:4.10.0"
     testImplementation "com.squareup.okhttp3:mockwebserver:4.10.0"
-
-    /* testing - spring kafka */
-    testImplementation 'org.springframework.kafka:spring-kafka-test'
-    testImplementation "org.testcontainers:kafka:$testcontainersVersion"
 
     /* Spring RestDocs */
     asciidoctorExtensions "org.springframework.restdocs:spring-restdocs-asciidoctor:$restdocsVersion"
