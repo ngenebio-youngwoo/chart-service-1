@@ -31,6 +31,7 @@
         const Y_AXIS_UP_POSITION = 10
         const CORE_EXON_SECTION_COLOR = '#eddefe'
         const INTRON_SECTION_COLOR = '#d2e9ff'
+        const GUIDELINE_COLOR = '#c0c0c0'
 
         async function drawChart() {
             const svg = initD3()
@@ -46,6 +47,7 @@
             initXAxis(svg, coveragePlotData);
             const maxYValue = initYAxis(svg, genoTypeDepthList);
             drawCoverageBar(svg, genoTypeDepthList, maxYValue)
+            drawAxisGuideLine(svg, maxYValue)
             drawSections(svg, coveragePlotData)
             drawHalfLine(svg)
 
@@ -122,7 +124,8 @@
                         .attr('width', x2)
                         .attr('height', height)
                         .style('fill', CORE_EXON_SECTION_COLOR)
-                        .style('opacity', 0.45)
+                        .style('stroke', '#DDDDDD')
+                        .style('opacity', 0.5)
                 })
 
             // intron
@@ -139,8 +142,25 @@
                         .attr('width', x2)
                         .attr('height', height)
                         .style('fill', INTRON_SECTION_COLOR)
-                        .style('opacity', 0.45)
+                        .style('stroke', '#DDDDDD')
+                        .style('opacity', 0.5)
                 })
+        }
+
+        function drawAxisGuideLine(svg, maxYValue) {
+            const GUIDE_LINE_UNIT = 100
+            const guideLineCount = maxYValue / GUIDE_LINE_UNIT
+            for (let index = 1; index <= guideLineCount; index++) {
+                const percentage = (GUIDE_LINE_UNIT * index) / Number.parseFloat(maxYValue)
+                const y = height * percentage
+                svg.append("line")
+                    .style("stroke", GUIDELINE_COLOR)
+                    .style('opacity', 0.4)
+                    .attr("x1", 0)
+                    .attr("y1", height - y)
+                    .attr("x2", width)
+                    .attr("y2", height - y)
+            }
         }
 
         function drawHalfLine(svg) {
@@ -170,7 +190,7 @@
                     .attr('width', 1)
                     .attr('height', yValue)
                     .style('fill', '#4ad5f7')
-                    // .style('opacity', 0.5)
+                    .style('opacity', 0.6)
             })
         }
     </script>
