@@ -24,7 +24,7 @@ public class GlobalRestControllerAdvice {
         log.error(e.getMessage());
         log.error(ExceptionUtils.getStackTrace(e));
         var responseDto = ResponseDto.builder()
-                .code(e.getErrorCode().getErrorCode())
+                .appCode(e.getErrorCode().getErrorCode())
                 .message(e.getMessage())
                 .build();
 

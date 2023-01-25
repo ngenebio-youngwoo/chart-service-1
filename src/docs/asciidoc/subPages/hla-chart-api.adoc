@@ -1,0 +1,26 @@
+= HLA 차트 API
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+== GET
+
+=== HLA Coverage Plot 차트 생성
+
+==== Query Parameters
+include::{snippets}/hla-generateCoveragePlotChart/query-parameters.adoc[]
+
+==== CURL Request
+include::{snippets}/hla-generateCoveragePlotChart/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/hla-generateCoveragePlotChart/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/hla-generateCoveragePlotChart/http-response.adoc[]
+
+==== Response Body
+include::{snippets}/hla-generateCoveragePlotChart/response-body.adoc[]
