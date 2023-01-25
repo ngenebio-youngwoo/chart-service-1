@@ -8,4 +8,7 @@ import java.util.List;
 
 public interface HlaChartService {
     ChartResult generateBaseVariationPlot(String json, List<ChartType> chartTypes) throws IOException;
+    ChartResult generateCoveragePlot(String json, List<ChartType> chartTypes) throws IOException;
+    ChartResult generateCoveragePlot(String runId, String sampleId, String gene, List<ChartType> chartTypes)
+            throws IOException;
 }
