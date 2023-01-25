@@ -54,6 +54,8 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+     implementation 'commons-io:commons-io:2.11.0'
+
 
     /* dev */
     developmentOnly "org.springframework.boot:spring-boot-devtools"
