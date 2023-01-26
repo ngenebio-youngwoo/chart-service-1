@@ -1,5 +1,6 @@
 package com.ngenebio.msa.chart.service.defaults;
 
+import com.ngenebio.msa.chart.exception.result.RequestResultServiceFailedException;
 import com.ngenebio.msa.chart.model.ChartResult;
 import com.ngenebio.msa.chart.model.enumtype.ChartType;
 import com.ngenebio.msa.chart.result.HlaResultServiceApi;
@@ -45,14 +46,50 @@ public class DefaultHlaChartService implements HlaChartService {
             var result = new ChartResult();
             for (var chartType : chartTypes) {
                 switch (chartType) {
-                    case BASE64 -> {
-                        result.setBase64(chartJavaScriptExecutorUtils.getChartPngImageBase64(javaScriptExecutor));
-                    }
+                    case BASE64 -> result.setBase64(chartJavaScriptExecutorUtils.getChartPngImageBase64(javaScriptExecutor));
                 }
             }
             return result;
-        } catch(Exception exception) {
-            throw exception;
+        } finally {
+            if (chromeDriver != null) chromeDriver.close();
+
+            chartServiceUtils.removeDirectory(tempDirectoryPath);
+        }
+    }
+
+    @Override
+    public ChartResult generateBaseVariationPlot(
+            String runId,
+            String sampleId,
+            String gene,
+            List<ChartType> chartTypes
+    ) throws IOException, RequestResultServiceFailedException {
+        Path tempDirectoryPath = null;
+        WebDriver chromeDriver = null;
+        final var chartHtmlFileResourcePath = "chart/hla/hla-base-variation-plot.html";
+
+        try {
+            var baseVariationPlotChartData = hlaResultServiceApi.getBaseVariationPlotChartData(runId, sampleId, gene);
+
+            tempDirectoryPath = chartServiceUtils.getTempDirectory();
+            Path chartHtmlFilePath = chartServiceUtils.generateRenderedChartHtmlFile(
+                    tempDirectoryPath,
+                    chartHtmlFileResourcePath,
+                    chartServiceUtils.toJsonString(baseVariationPlotChartData)
+            );
+
+            chromeDriver = chartServiceUtils.createChromeDriver();
+
+            var javaScriptExecutor = (JavascriptExecutor) chromeDriver;
+            chromeDriver.get("file://" + chartHtmlFilePath.toFile().getAbsolutePath());
+
+            var result = new ChartResult();
+            for (var chartType : chartTypes) {
+                switch (chartType) {
+                    case BASE64 -> result.setBase64(chartJavaScriptExecutorUtils.getChartPngImageBase64(javaScriptExecutor));
+                }
+            }
+            return result;
         } finally {
             if (chromeDriver != null) chromeDriver.close();
 
@@ -78,14 +115,10 @@ public class DefaultHlaChartService implements HlaChartService {
             var result = new ChartResult();
             for (var chartType : chartTypes) {
                 switch (chartType) {
-                    case BASE64 -> {
-                        result.setBase64(chartJavaScriptExecutorUtils.getChartPngImageBase64(javaScriptExecutor));
-                    }
+                    case BASE64 -> result.setBase64(chartJavaScriptExecutorUtils.getChartPngImageBase64(javaScriptExecutor));
                 }
             }
             return result;
-        } catch(Exception exception) {
-            throw exception;
         } finally {
             if (chromeDriver != null) chromeDriver.close();
 
@@ -94,7 +127,7 @@ public class DefaultHlaChartService implements HlaChartService {
     }
 
     @Override
-    public ChartResult generateCoveragePlot(String runId, String sampleId, String gene, List<ChartType> chartTypes) throws IOException {
+    public ChartResult generateCoveragePlot(String runId, String sampleId, String gene, List<ChartType> chartTypes) throws IOException, RequestResultServiceFailedException {
         Path tempDirectoryPath = null;
         WebDriver chromeDriver = null;
         final var chartHtmlFileResourcePath = "chart/hla/hla-coverage-plot.html";
@@ -117,14 +150,10 @@ public class DefaultHlaChartService implements HlaChartService {
             var result = new ChartResult();
             for (var chartType : chartTypes) {
                 switch (chartType) {
-                    case BASE64 -> {
-                        result.setBase64(chartJavaScriptExecutorUtils.getChartPngImageBase64(javaScriptExecutor));
-                    }
+                    case BASE64 -> result.setBase64(chartJavaScriptExecutorUtils.getChartPngImageBase64(javaScriptExecutor));
                 }
             }
             return result;
-        } catch(Exception exception) {
-            throw exception;
         } finally {
             if (chromeDriver != null) chromeDriver.close();
 
