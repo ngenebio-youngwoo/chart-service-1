@@ -21,3 +21,5 @@ springdoc:
     swagger-ui:
         path: /api/v3/swagger-ui.html
         url: /openApi.yaml
+chart-service:
+    result-service-url: http://localhost:28080

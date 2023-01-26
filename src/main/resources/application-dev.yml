@@ -7,3 +7,5 @@ spring:
             enabled: true
 server:
     port: 9090
+chart-service:
+    result-service-url: http://localhost:28080

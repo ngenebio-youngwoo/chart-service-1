@@ -6,3 +6,5 @@ server:
     port: 8080
 logging:
     config: classpath:logback/logback-prod.xml
+chart-service:
+    result-service-url: http://localhost:28080
