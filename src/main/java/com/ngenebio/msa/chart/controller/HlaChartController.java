@@ -1,19 +1,20 @@
 package com.ngenebio.msa.chart.controller;
 
+import com.ngenebio.msa.chart.exception.result.RequestResultServiceFailedException;
 import com.ngenebio.msa.chart.model.ChartResult;
 import com.ngenebio.msa.chart.model.ResponseDto;
 import com.ngenebio.msa.chart.model.enumtype.ChartType;
 import com.ngenebio.msa.chart.service.HlaChartService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -24,9 +25,20 @@ public class HlaChartController {
     private final HlaChartService hlaChartService;
 
     @GetMapping("/base-variation-plot")
-    public ResponseEntity<Resource> generateBaseVariationPlotChart() {
-        // TODO: 차트 생성 서비스 호출
-        throw new NotImplementedException();
+    public ResponseEntity<ResponseDto<ChartResult>> generateBaseVariationPlotChart(
+            @RequestParam String runId,
+            @RequestParam String sampleId,
+            @RequestParam String gene,
+            @RequestParam List<ChartType> chartTypes
+    ) throws IOException, RequestResultServiceFailedException {
+        var responseDto = new ResponseDto<ChartResult>();
+
+        ChartResult chartResult = hlaChartService.generateBaseVariationPlot(runId, sampleId, gene, chartTypes);
+        responseDto.setData(chartResult);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(responseDto);
     }
 
     @GetMapping("/coverage-plot")
@@ -35,7 +47,7 @@ public class HlaChartController {
             @RequestParam String sampleId,
             @RequestParam String gene,
             @RequestParam List<ChartType> chartTypes
-    ) throws IOException {
+    ) throws IOException, RequestResultServiceFailedException {
         var responseDto = new ResponseDto<ChartResult>();
 
         ChartResult chartResult = hlaChartService.generateCoveragePlot(runId, sampleId, gene, chartTypes);

@@ -1,4 +1,4 @@
-= Spring REST Docs
+= Chart Service API
 dpTablo Spring REST Docs Sample
 :doctype: book
 :icons: font
@@ -6,8 +6,6 @@ dpTablo Spring REST Docs Sample
 :toc: left
 :toclevels: 2
 :sectlinks:
-
-Chart Service API 문서
 
 == API 목록
 link:subPages/hla-chart-api.html[HLA 차트 API]

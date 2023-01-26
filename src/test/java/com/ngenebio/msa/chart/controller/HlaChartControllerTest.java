@@ -1,5 +1,6 @@
 package com.ngenebio.msa.chart.controller;
 
+import com.ngenebio.msa.chart.exception.result.RequestResultServiceFailedException;
 import com.ngenebio.msa.chart.model.ChartResult;
 import com.ngenebio.msa.chart.model.enumtype.ChartType;
 import com.ngenebio.msa.chart.service.HlaChartService;
@@ -22,16 +23,16 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,7 +63,55 @@ class HlaChartControllerTest {
     }
 
     @Test
-    void generateBaseVariationPlotChart() {
+    void generateBaseVariationPlotChart() throws Exception {
+        // given
+        var runId = "20220729_145710";
+        var sampleId = "crs010";
+        var gene = "A";
+
+        var chartResult = ChartResult.builder()
+                .base64("data:image/png;base64,iVBORw0...")
+                .build();
+
+        doReturn(chartResult).when(hlaChartService)
+                .generateBaseVariationPlot(runId, sampleId, gene, Arrays.asList(ChartType.BASE64));
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(
+                        get("/chart/hla/base-variation-plot")
+                                .queryParam("runId", runId)
+                                .queryParam("sampleId", sampleId)
+                                .queryParam("gene", gene)
+                                .queryParam("chartTypes", "base64")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andDo(document("hla-{methodName}",
+                        queryParameters(
+                                parameterWithName("runId").description("Run Id"),
+                                parameterWithName("sampleId").description("Sample Id"),
+                                parameterWithName("gene").description("Gene (ex: A | B | )"),
+                                parameterWithName("chartTypes").description(
+                                        String.format("생성된 차트의 형태 (%s)", ChartType.getAllValueString()))
+                        ),
+                        responseFields(
+                                fieldWithPath("appCode").description("어플리케이션 결과 코드"),
+                                fieldWithPath("message").description("어플리케이션 결과 "),
+                                fieldWithPath("data").description("ChartResult 데이터"),
+                                fieldWithPath("data.base64").description("ChartResult - base64 이미지")
+                        )
+                ))
+                .andReturn();
+
+        // then
+        var resultResponse = mvcResult.getResponse();
+        assertThat(resultResponse.getStatus()).isEqualTo(200);
+        assertThat(resultResponse.getHeader(HttpHeaders.CONTENT_TYPE)).contains("application/json");
+        assertThat(resultResponse.getContentAsByteArray()).isNotNull();
+
+        verify(hlaChartService, times(1))
+                .generateBaseVariationPlot(eq(runId), eq(sampleId), eq(gene), anyList());
     }
 
     @DisplayName("HLA - coverage plot - 성공")
@@ -74,12 +123,11 @@ class HlaChartControllerTest {
         var gene = "A";
 
         var chartResult = ChartResult.builder()
-                .base64("base64~~~")
+                .base64("data:image/png;base64,iVBORw0...")
                 .build();
 
         doReturn(chartResult).when(hlaChartService)
                 .generateCoveragePlot(runId, sampleId, gene, Arrays.asList(ChartType.BASE64));
-
 
         // when
         MvcResult mvcResult = mockMvc.perform(
@@ -99,6 +147,12 @@ class HlaChartControllerTest {
                                 parameterWithName("gene").description("Gene (ex: A | B | )"),
                                 parameterWithName("chartTypes").description(
                                         String.format("생성된 차트의 형태 (%s)", ChartType.getAllValueString()))
+                        ),
+                        responseFields(
+                                fieldWithPath("appCode").description("어플리케이션 결과 코드"),
+                                fieldWithPath("message").description("어플리케이션 결과 "),
+                                fieldWithPath("data").description("ChartResult 데이터"),
+                                fieldWithPath("data.base64").description("ChartResult - base64 이미지")
                         )
                 ))
                 .andReturn();

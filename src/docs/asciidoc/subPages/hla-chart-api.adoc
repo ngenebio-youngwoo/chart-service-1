@@ -8,6 +8,25 @@
 
 == GET
 
+=== HLA Base Variation Plot 차트 생성
+==== Query Parameters
+include::{snippets}/hla-generateBaseVariationPlotChart/query-parameters.adoc[]
+
+==== CURL Request
+include::{snippets}/hla-generateBaseVariationPlotChart/curl-request.adoc[]
+
+==== HTTP Request
+include::{snippets}/hla-generateBaseVariationPlotChart/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/hla-generateBaseVariationPlotChart/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/hla-generateBaseVariationPlotChart/response-fields.adoc[]
+
+==== Response Body
+include::{snippets}/hla-generateBaseVariationPlotChart/response-body.adoc[]
+
 === HLA Coverage Plot 차트 생성
 
 ==== Query Parameters
@@ -21,6 +40,9 @@ include::{snippets}/hla-generateCoveragePlotChart/http-request.adoc[]
 
 ==== HTTP Response
 include::{snippets}/hla-generateCoveragePlotChart/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/hla-generateCoveragePlotChart/response-fields.adoc[]
 
 ==== Response Body
 include::{snippets}/hla-generateCoveragePlotChart/response-body.adoc[]
