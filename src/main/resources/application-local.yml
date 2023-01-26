@@ -1,25 +1,13 @@
 spring:
-    config:
-        activate:
-            on-profile: local
+    profiles:
+        group:
+          local:
+              - default
     devtools:
         livereload:
             enabled: true
-server:
-    port: 9090
 logging:
     level:
         root: info
-springdoc:
-    default-produces-media-type: application/x-yaml;charset=UTF-8
-    default-consumes-media-type: application/x-yaml;charset=UTF-8
-    cache:
-        disabled: true
-    api-docs:
-        enabled: false
-        path: /openApi.yaml
-    swagger-ui:
-        path: /api/v3/swagger-ui.html
-        url: /openApi.yaml
 chart-service:
     result-service-url: http://localhost:28080

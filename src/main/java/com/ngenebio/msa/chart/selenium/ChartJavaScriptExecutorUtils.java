@@ -10,6 +10,6 @@ public class ChartJavaScriptExecutorUtils {
                 "var callback = arguments[arguments.length - 1];" +
                         "generateChartPngImage(callback);");
 
-        return response instanceof String ? (String) response : response.toString();
+        return response instanceof String value ? value : response.toString();
     }
 }

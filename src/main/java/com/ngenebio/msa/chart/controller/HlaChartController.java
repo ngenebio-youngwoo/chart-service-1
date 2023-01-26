@@ -26,10 +26,10 @@ public class HlaChartController {
 
     @GetMapping("/base-variation-plot")
     public ResponseEntity<ResponseDto<ChartResult>> generateBaseVariationPlotChart(
-            @RequestParam String runId,
-            @RequestParam String sampleId,
-            @RequestParam String gene,
-            @RequestParam List<ChartType> chartTypes
+            @RequestParam("runId") String runId,
+            @RequestParam("sampleId") String sampleId,
+            @RequestParam("gene") String gene,
+            @RequestParam("chartTypes") List<ChartType> chartTypes
     ) throws IOException, RequestResultServiceFailedException {
         var responseDto = new ResponseDto<ChartResult>();
 
@@ -43,10 +43,10 @@ public class HlaChartController {
 
     @GetMapping("/coverage-plot")
     public ResponseEntity<ResponseDto<ChartResult>> generateCoveragePlotChart(
-            @RequestParam String runId,
-            @RequestParam String sampleId,
-            @RequestParam String gene,
-            @RequestParam List<ChartType> chartTypes
+            @RequestParam("runId") String runId,
+            @RequestParam("sampleId") String sampleId,
+            @RequestParam("gene") String gene,
+            @RequestParam("chartTypes") List<ChartType> chartTypes
     ) throws IOException, RequestResultServiceFailedException {
         var responseDto = new ResponseDto<ChartResult>();
 
