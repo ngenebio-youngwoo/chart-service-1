@@ -10,6 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -22,7 +23,7 @@ class ChartServiceUtilsTest {
 
     @DisplayName("createChromeDriver() 성공")
     @Test
-    void createChromeDriverTest() {
+    void createChromeDriverTest() throws MalformedURLException {
         var webDriver = chartServiceUtils.createChromeDriver();
         assertThat(webDriver).isNotNull();
     }
