@@ -25,7 +25,7 @@ repositories {
 }
 
 group = "com.ngenebio"
-version = "0.0.1"
+version = "0.1.0"
 
 sourceCompatibility = 17
 targetCompatibility = 17

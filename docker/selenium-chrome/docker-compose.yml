@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  selenium:
+    mem_limit: 3221225472
+    image: selenium/standalone-chrome:109.0
+    environment:
+      - START_XVFB=false
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=10
+      - JAVA_OPTS=-XX:ActiveProcessorCount=10
+    ports:
+      - "4444:4444"
+      - "5900:5900"

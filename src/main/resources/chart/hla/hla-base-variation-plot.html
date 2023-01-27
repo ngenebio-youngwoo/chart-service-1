@@ -79,7 +79,7 @@
         }
 
         function generateChartSvgImageBase64() {
-            const svg = document.querySelector('#d3_aria_line_chart > svg')
+            const svg = document.querySelector('#d3_base_variation_plot_chart > svg')
             const value = new XMLSerializer().serializeToString(svg)
             return 'data:image/svg+xml;base64,' + window.btoa(value)
         }
@@ -150,14 +150,14 @@
 
         async function loadData() {
             // mustache 로 데이터를 삽입하는 코드
-            // const data = `{{&jsonData}}`
-            // return JSON.parse(data)
+            const data = `{{&jsonData}}`
+            return JSON.parse(data)
 
             // 로컬 서버를 이용한 데이터 로드 코드
-            const response = await fetch('http://localhost:3000/hla/baseVariationPlotData.json', {
-                method: 'GET'
-            })
-            return response.json()
+            // const response = await fetch('http://localhost:3000/hla/baseVariationPlotData.json', {
+            //     method: 'GET'
+            // })
+            // return response.json()
         }
 
         function initXAxis(svg, baseVariationPlotData) {
@@ -359,7 +359,7 @@
     </script>
 
     <style>
-        #d3_aria_line_chart > svg {
+        #d3_base_variation_plot_chart > svg {
             border: 1px solid gray;
         }
     </style>
