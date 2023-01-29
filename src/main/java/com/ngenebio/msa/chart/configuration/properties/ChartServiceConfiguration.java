@@ -9,4 +9,5 @@ import org.springframework.stereotype.Component;
 @Data
 public class ChartServiceConfiguration {
     private String resultServiceUrl;
+    private String seleniumServiceUrl;
 }

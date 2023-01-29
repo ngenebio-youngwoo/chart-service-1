@@ -2,7 +2,9 @@ package com.ngenebio.msa.chart.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ngenebio.msa.chart.configuration.properties.ChartServiceConfiguration;
 import com.ngenebio.msa.chart.mustache.MustacheChartHtmlGenerator;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -20,10 +22,13 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class ChartServiceUtils {
+    private final ChartServiceConfiguration chartServiceConfiguration;
+
     private final MustacheChartHtmlGenerator mustacheChartHtmlGenerator = new MustacheChartHtmlGenerator();
 
-    public  WebDriver createChromeDriver() throws MalformedURLException {
+    public WebDriver createChromeDriver() throws MalformedURLException {
         // Windows chromve webdriver settings
 //        System.setProperty("webdriver.chrome.driver", "D:\\downloads\\chromedriver_win32\\chromedriver.exe");
 
@@ -39,7 +44,7 @@ public class ChartServiceUtils {
         chromeOptions.addArguments("--disable-extensions");
 
         // Remove Web Driver 사용 코드
-        return new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), chromeOptions);
+        return new RemoteWebDriver(new URL(chartServiceConfiguration.getSeleniumServiceUrl()), chromeOptions);
 
         // Local Web Driver 사용 코드
 //        return new ChromeDriver(chromeOptions);
