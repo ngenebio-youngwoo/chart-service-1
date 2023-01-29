@@ -85,4 +85,10 @@ class ChartServiceUtilsTest {
         assertThat(convertedJsonString).isNotNull();
         assertThat(convertedJsonString).isEqualTo(jsonString);
     }
+
+    @DisplayName("convertChartHtmlToDataHtmlUrlString 성공")
+    @Test
+    void convertChartHtmlToDataHtmlUrlStringTest(){
+        fail("test case not implment.");
+    }
 }

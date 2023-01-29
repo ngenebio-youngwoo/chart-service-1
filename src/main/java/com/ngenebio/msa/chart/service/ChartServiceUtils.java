@@ -7,7 +7,6 @@ import com.ngenebio.msa.chart.mustache.MustacheChartHtmlGenerator;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.core.io.ClassPathResource;
@@ -16,6 +15,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -74,7 +75,7 @@ public class ChartServiceUtils {
         var renderedChartHtmlString = mustacheChartHtmlGenerator.execute(chartHtmlString, json);
 
         return Files.write(
-                Paths.get(tempDirectoryPath.toFile().getAbsolutePath(), UUID.randomUUID().toString() + ".html"),
+                Paths.get(tempDirectoryPath.toFile().getAbsolutePath(), UUID.randomUUID() + ".html"),
                 renderedChartHtmlString.getBytes());
     }
     
@@ -90,5 +91,12 @@ public class ChartServiceUtils {
     public String toJsonString(Object object) throws JsonProcessingException {
         var objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(object);
+    }
+
+    public String convertChartHtmlToDataHtmlUrlString(Path chartHtmlFilePath) throws IOException {
+        var htmlString = new String(Files.readAllBytes(chartHtmlFilePath));
+        htmlString = URLEncoder.encode(htmlString, StandardCharsets.UTF_8);
+        htmlString = htmlString.replace("+", "%20");
+        return "data:text/html;charset=UTF-8," + htmlString;
     }
 }

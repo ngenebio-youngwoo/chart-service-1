@@ -1,5 +1,6 @@
 package com.ngenebio.msa.chart.service.defaults;
 
+import com.ngenebio.msa.chart.configuration.properties.ChartServiceConfiguration;
 import com.ngenebio.msa.chart.exception.result.RequestResultServiceFailedException;
 import com.ngenebio.msa.chart.model.ChartResult;
 import com.ngenebio.msa.chart.model.chart.hla.BaseVariationPlotChartData;
@@ -31,14 +32,20 @@ public class DefaultHlaChartServiceRealTest {
     @Mock
     private HlaResultServiceApi hlaResultServiceApi;
 
-    private ChartServiceUtils chartServiceUtils = new ChartServiceUtils();
+    @Mock
+    private ChartServiceConfiguration chartServiceConfiguration;
 
-    private ChartJavaScriptExecutorUtils chartJavaScriptExecutorUtils = new ChartJavaScriptExecutorUtils();
+    private ChartServiceUtils chartServiceUtils;
+
+    private final ChartJavaScriptExecutorUtils chartJavaScriptExecutorUtils = new ChartJavaScriptExecutorUtils();
 
     @DisplayName("통합테스트 - base coverage plot 차트 생성 성공")
     @Test
     public void baseVariationPlotTest() throws IOException, RequestResultServiceFailedException {
         // given - service
+        when(chartServiceConfiguration.getSeleniumServiceUrl()).thenReturn("http://localhost:4444/wd/hub");
+        chartServiceUtils = new ChartServiceUtils(chartServiceConfiguration);
+
         hlaChartService = new DefaultHlaChartService(
                 hlaResultServiceApi,
                 chartServiceUtils,
@@ -65,5 +72,6 @@ public class DefaultHlaChartServiceRealTest {
 
         // then
         assertThat(chartResult).isNotNull();
+        assertThat(chartResult.getBase64().length()).isGreaterThan(10000);
     }
 }

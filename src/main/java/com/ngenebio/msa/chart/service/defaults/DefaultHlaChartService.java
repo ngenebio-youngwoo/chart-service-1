@@ -81,7 +81,13 @@ public class DefaultHlaChartService implements HlaChartService {
             chromeDriver = chartServiceUtils.createChromeDriver();
 
             var javaScriptExecutor = (JavascriptExecutor) chromeDriver;
-            chromeDriver.get("file://" + chartHtmlFilePath.toFile().getAbsolutePath());
+
+            // local chrome driver에 html 물리경로를 지정하여 호출하는 코드
+//            chromeDriver.get("file://" + chartHtmlFilePath.toFile().getAbsolutePath());
+
+            // remote selenium에 html문서내용을 url로 전달하여 로드하는 코드
+            var htmlDataUrlString = chartServiceUtils.convertChartHtmlToDataHtmlUrlString(chartHtmlFilePath);
+            chromeDriver.get("data:text/html;charset=UTF-8," + htmlDataUrlString);
 
             var result = new ChartResult();
             for (var chartType : chartTypes) {
@@ -91,7 +97,10 @@ public class DefaultHlaChartService implements HlaChartService {
             }
             return result;
         } finally {
-            if (chromeDriver != null) chromeDriver.close();
+            if (chromeDriver != null) {
+                chromeDriver.close();
+                chromeDriver.quit();
+            }
 
             chartServiceUtils.removeDirectory(tempDirectoryPath);
         }
