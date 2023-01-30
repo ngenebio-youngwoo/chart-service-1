@@ -10,4 +10,5 @@ logging:
     level:
         root: info
 chart-service:
-    result-service-url: http://localhost:28080
+    selenium-service-url: http://localhost:4444/wd/hub
+    result-service-url: http://localhost:9090

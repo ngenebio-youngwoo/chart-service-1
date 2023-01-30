@@ -8,4 +8,5 @@ server:
 logging:
     config: classpath:logback/logback-prod.xml
 chart-service:
+    selenium-service-url: http://192.168.1.30:4444/wd/hub
     result-service-url: http://localhost:28080

@@ -23,7 +23,6 @@ springdoc:
         path: /api/v3/docs
     swagger-ui:
         path: /api/v3/swagger-ui.html
-
 chart-service:
     selenium-service-url: http://localhost:4444/wd/hub
     result-service-url: http://localhost:9090
