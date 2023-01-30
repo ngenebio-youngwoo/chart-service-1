@@ -2,8 +2,8 @@ version: "3.1"
 
 services:
   ngenebio-chart-service:
-    image: ngenebio-msa-chart-service:0.0.1.0
+    image: ngenebio/msa-chart-service:0.0.1.0
     container_name: ngenebio-msa-chart-service
     ports:
-      - 38080:8088
+      - 38080:8080
     restart: always
