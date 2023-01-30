@@ -52,6 +52,4 @@
     <logger name="access-log" level="info" additivity="false">
         <appender-ref ref="ACCESSLOG" />
     </logger>
-
-    <logger></logger>
 </configuration>

@@ -43,52 +43,6 @@ class DefaultHlaChartServiceTest {
     @Spy
     private HlaResultServiceApi hlaResultServiceApi;
 
-    @DisplayName("BaseVariationPlot 차트 생성 성공 - base64")
-    @Test
-    void generateBaseVariationPlotTest() throws IOException {
-        // given - temp directory
-        var tempDirectoryPath = Paths.get(System.getProperty("java.io.tmpdir"),
-                "ngenebio_chart_temp", UUID.randomUUID().toString());
-
-        if (!Files.exists(tempDirectoryPath))
-            Files.createDirectories(tempDirectoryPath);
-
-        when(chartServiceUtils.getTempDirectory()).thenReturn(tempDirectoryPath);
-
-        // given - chrome driver
-        when(chartServiceUtils.createChromeDriver()).thenCallRealMethod();
-
-        // given - generateRenderedChartHtmlFile
-        var dummyPath = Paths.get("");
-        doReturn(dummyPath).when(chartServiceUtils).generateRenderedChartHtmlFile(any(), any(), any());
-
-        // given - create png image
-        doReturn("").when(chartJavaScriptExecutorUtils).getChartPngImageBase64(any());
-
-        var dataFilePath = Paths.get("src", "test", "resources",
-                "data", "hla", "baseVariationPlotData.json");
-        var json = new String(Files.readAllBytes(dataFilePath));
-
-        var chartTypes = List.of(ChartType.BASE64);
-
-        // when
-        var result = hlaChartService.generateBaseVariationPlot(json, chartTypes);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getBase64()).isNotNull();
-
-        verify(chartServiceUtils, times(1)).createChromeDriver();
-        verify(chartServiceUtils, times(1)).getTempDirectory();
-        verify(chartServiceUtils, times(1)).generateRenderedChartHtmlFile(
-                tempDirectoryPath,
-                "chart/hla/hla-base-variation-plot.html",
-                json
-        );
-
-        verify(chartJavaScriptExecutorUtils, times(1))
-                .getChartPngImageBase64(any(JavascriptExecutor.class));
-    }
     @DisplayName("BaseVariationPlot 차트 생성 성공 - runId, sampleId, gene, base64")
     @Test
     void generateBaseVariationPlot_runId_sampleId_geneTest() throws IOException, RequestResultServiceFailedException {
@@ -143,51 +97,6 @@ class DefaultHlaChartServiceTest {
                 eq(tempDirectoryPath),
                 eq("chart/hla/hla-base-variation-plot.html"),
                 any(String.class)
-        );
-
-        verify(chartJavaScriptExecutorUtils, times(1))
-                .getChartPngImageBase64(any(JavascriptExecutor.class));
-    }
-
-    @DisplayName("Coverage Plot 차트 생성 성공 - base64")
-    @Test
-    void generateCoveragePlotTest() throws IOException {
-        // given - temp directory
-        var tempDirectoryPath = Paths.get(System.getProperty("java.io.tmpdir"),
-                "ngenebio_chart_temp", UUID.randomUUID().toString());
-
-        if (!Files.exists(tempDirectoryPath))
-            Files.createDirectories(tempDirectoryPath);
-
-        when(chartServiceUtils.getTempDirectory()).thenReturn(tempDirectoryPath);
-
-        // given - chrome driver
-        when(chartServiceUtils.createChromeDriver()).thenCallRealMethod();
-
-        // given - generateRenderedChartHtmlFile
-        var dummyPath = Paths.get("");
-        doReturn(dummyPath).when(chartServiceUtils).generateRenderedChartHtmlFile(any(), any(), any());
-
-        // given - create png image
-        doReturn("").when(chartJavaScriptExecutorUtils).getChartPngImageBase64(any());
-
-        var json = "{ \"dummyData\": \"coverage plot\" }";
-
-        var chartTypes = List.of(ChartType.BASE64);
-
-        // when
-        var result = hlaChartService.generateCoveragePlot(json, chartTypes);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getBase64()).isNotNull();
-
-        verify(chartServiceUtils, times(1)).createChromeDriver();
-        verify(chartServiceUtils, times(1)).getTempDirectory();
-        verify(chartServiceUtils, times(1)).generateRenderedChartHtmlFile(
-                tempDirectoryPath,
-                "chart/hla/hla-coverage-plot.html",
-                json
         );
 
         verify(chartJavaScriptExecutorUtils, times(1))

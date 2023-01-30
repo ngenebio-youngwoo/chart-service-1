@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@ActiveProfiles("local")
+@ActiveProfiles("dev")
 public class DefaultHlaChartServiceRealTest {
     private DefaultHlaChartService hlaChartService;
 
@@ -43,7 +43,7 @@ public class DefaultHlaChartServiceRealTest {
     @Test
     public void baseVariationPlotTest() throws IOException, RequestResultServiceFailedException {
         // given - service
-        when(chartServiceConfiguration.getSeleniumServiceUrl()).thenReturn("http://localhost:4444/wd/hub");
+        when(chartServiceConfiguration.getSeleniumServiceUrl()).thenReturn("http://192.168.1.30:4444/wd/hub");
         chartServiceUtils = new ChartServiceUtils(chartServiceConfiguration);
 
         hlaChartService = new DefaultHlaChartService(
